@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>test</title>
+    <style type="text/css">
+        #map {
+            height: 400px;
+            width: 100%;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+
+</head>
+<body>
+    <script type="text/javascript">
+        $(function () {
+            setInterval('refresh()', 10000);
+        });
+    </script><div id="test">
+    <h1>{{ accVal }}</h1>
+    <div>
+        <h1>{{ gpsVal.latValue }}</h1>
+</div>
+<div>
+    <h3>My Google Maps Demo</h3>
+    <div id="map"></div>
+    <!-- Replace the value of the key parameter with your own API key. -->
+    <script async defer
+            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDHFbMt-cf61OOja_1vqB0IoExaSkCZAE8&callback=initMap">
+    </script>
+
+</div></div>
+
+<script type="text/javascript">
+    function initMap() {
+        var uluru = {lat: 12.902496, lng: 77.504822};
+        var map = new google.maps.Map(document.getElementById('map'), {
+            zoom: 15,
+            center: uluru
+        });
+        var marker = new google.maps.Marker({
+            position: uluru,
+            map: map
+        });
+    }
+</script>
+</body>
+</html>

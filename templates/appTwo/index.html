@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+{% load staticfiles %}
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>iCare</title>
+    <!-- Bootstrap core CSS-->
+    <link href="{% static "vendor/bootstrap/css/bootstrap.min.css" %}" rel="stylesheet">
+    <!-- Custom fonts for this template-->
+    <link href="{% static "vendor/font-awesome/css/font-awesome.min.css" %}" rel="stylesheet" type="text/css">
+    <!-- Page level plugin CSS-->
+    <link href="{% static "vendor/datatables/dataTables.bootstrap4.css" %}" rel="stylesheet">
+    <!-- Custom styles for this template-->
+    <link href="{% static "css/sb-admin.css" %}" rel="stylesheet">
+    <style type="text/css">
+        #map {
+            height: 400px;
+            width: 100%;
+        }
+    </style>
+    {#    Google Maps GPS JavaScript#}
+
+    <script type="text/javascript">
+
+        function initMap() {
+            var centerr = {lat: 12.902496, lng: 77.504822};
+            var current = {lat: {{ gpsVal.0.latValue }}, lng: {{ gpsVal.0.longValue }}};
+            var map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 16,
+                center: centerr
+            });
+            var marker = new google.maps.Marker({
+                position: centerr,
+                icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+                animation: google.maps.Animation.DROP,
+                map: map
+            });
+            var marker = new google.maps.Marker({
+                position: current,
+                map: map
+            });
+        }
+    </script>
+    {#Auto-Refresh Ajax js#}
+
+<script type="text/javascript">
+        function refresh() {
+            $.ajax({
+                url: '{% url 'index' %}',
+                success: function (data) {
+                    $("#page-top").html(data);
+                    {#alert(data);#}
+                }
+            });
+
+        }
+    </script>
+
+</head>
+
+<body class="sticky-footer bg-dark" id="page-top">
+
+<!-- Navigation-->
+<div class="">
+    <div class="container-fluid">
+        <!-- Breadcrumbs-->
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="#">Dashboard</a>
+            </li>
+            <li class="breadcrumb-item active">My Dashboard</li>
+        </ol>
+        <!-- Icon Cards-->
+        <div class="row">
+            <div class="col-xl-3 col-sm-6 mb-3">
+                <div class="card text-white bg-primary o-hidden h-100">
+                    <div class="card-body">
+                        <div class="mr-5">Tremor detected?</div>
+                        <div class="h2 mr-5">{{ accVal.0.isTremor }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-sm-6 mb-3">
+                <div class="card text-white bg-warning o-hidden h-100">
+                    <div class="card-body">
+                        <div class="mr-5">Fall detected?</div>
+                        <div class="h2 mr-5">{{ accVal.0.isFall }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-sm-6 mb-3">
+                {% if gpsVal.0.isSafe == 'True' %}
+                    <div class="card text-white bg-success o-hidden h-100">
+                        <div class="card-body">
+                            <div class="mr-5">In Safe Zone?</div>
+                            <div class="h2 mr-5">{{ gpsVal.0.isSafe }} -- {{ gpsVal.0.safeDist }}m</div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="card text-white bg-danger o-hidden h-100">
+                        <div class="card-body">
+                            <div class="mr-5">In Safe Zone?</div>
+                            <div class="h2 mr-5">{{ gpsVal.0.isSafe }} -- {{ gpsVal.0.safeDist }}m</div>
+                            <div class="mr-5">Latitude:{{ gpsVal.0.latValue }} Longitude: {{ gpsVal.0.longValue }}</div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+            <div class="col-xl-3 col-sm-6 mb-3">
+                <div class="card text-white bg-secondary o-hidden h-100">
+                    <div class="card-body">
+                        <div class="mr-5">BPM</div>
+                        <div class="h2 mr-5">{{ gpsVal.0.bpm }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Area Chart Example-->
+        <div class="card mb-3">
+            <div class="card-header">
+                <i class="fa fa-area-chart"></i> Pulse Rate
+            </div>
+            <div class="card-body">
+                <canvas id="myAreaChart" width="100%" height="30"></canvas>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <!-- Example Pie Chart Card-->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <i class="fa fa-pie-chart"></i> GPS Location
+                    </div>
+                    <div class="card-body">
+                        <div id="map"></div>
+                        <!-- Replace the value of the key parameter with your own API key. -->
+                        <script async defer
+                                src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDHFbMt-cf61OOja_1vqB0IoExaSkCZAE8&callback=initMap">
+                        </script>
+                    </div>
+                </div>
+                <!-- Example Notifications Card-->
+            </div>
+        </div>
+        <!-- Example DataTables Card-->
+        <div class="card mb-3">
+            <div class="card-header">
+                <i class="fa fa-table"></i> Data Table
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="dataTable1" width="100%" cellspacing="0">
+                        <thead>
+                        <tr>
+                            <th>Updated</th>
+                            <th>isTremor</th>
+                            <th>isFall</th>
+                        </tr>
+                        </thead>
+                        <tfoot>
+                        <tr>
+                            <th>Updated</th>
+                            <th>isTremor</th>
+                            <th>isFall</th>
+                        </tr>
+                        </tfoot>
+                        <tbody>
+                        {% for obj in accVal %}
+                            <tr>
+                                <td>{{ obj.updated }}</td>
+                                <td>{{ obj.isTremor }}</td>
+                                <td>{{ obj.isFall }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Example DataTables Card-->
+        <div class="card mb-3">
+            <div class="card-header">
+                <i class="fa fa-table"></i> Data Table
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="dataTable2" width="100%" cellspacing="0">
+                        <thead>
+                        <tr>
+                            <th>Updated</th>
+                            <th>Current Latitute</th>
+                            <th>Current Latitude</th>
+                            <th>Distance from Center</th>
+                            <th>isSafe</th>
+                            <th>BPM</th>
+                        </tr>
+                        </thead>
+                        <tfoot>
+                        <tr>
+                            <th>Updated</th>
+                            <th>Current Latitute</th>
+                            <th>Current Latitude</th>
+                            <th>Distance from Center</th>
+                            <th>isSafe</th>
+                            <th>BPM</th>
+                        </tr>
+                        </tfoot>
+                        <tbody>
+                        {% for obj in gpsVal %}
+                            <tr>
+                                <td>{{ obj.updated }}</td>
+                                <td>{{ obj.latValue }}</td>
+                                <td>{{ obj.longValue }}</td>
+                                <td>{{ obj.safeDist }}</td>
+                                <td>{{ obj.isSafe }}</td>
+                                <td>{{ obj.bpm }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /.container-fluid-->
+    <!-- /.content-wrapper-->
+    <!-- Scroll to Top Button-->
+    <a class="scroll-to-top rounded" href="#page-top">
+        <i class="fa fa-angle-up"></i>
+    </a>
+    <!-- Logout Modal-->
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+                    <a class="btn btn-primary" href="login.html">Logout</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Bootstrap core JavaScript-->
+<script src="{% static "vendor/jquery/jquery.min.js" %}"></script>
+<script src="{% static "vendor/bootstrap/js/bootstrap.bundle.min.js" %}"></script>
+<!-- Core plugin JavaScript-->
+<script src="{% static "vendor/jquery-easing/jquery.easing.min.js" %}"></script>
+<!-- Page level plugin JavaScript-->
+<script src="{% static "vendor/chart.js/Chart.min.js" %}"></script>
+<script src="{% static "vendor/datatables/jquery.dataTables.js" %}"></script>
+<script src="{% static "vendor/datatables/dataTables.bootstrap4.js" %}"></script>
+<!-- Custom scripts for all pages-->
+<script src="{% static "js/sb-admin.js" %}"></script>
+<!-- Custom scripts for this page-->
+{#    <script src="{% static "js/sb-admin-datatables.js" %}"></script>#}
+
+{#    Charts js#}
+<script type="text/javascript">
+    // Chart.js scripts
+    // -- Set new default font family and font color to mimic Bootstrap's default styling
+    var time = [];
+    {% for obj in gpsVal|slice:"0:10" %}
+        time.push("{{ obj.updated }}");
+    {% endfor %}
+    var bpm = [];
+    {% for obj in gpsVal|slice:"0:10" %}
+        bpm.push({{ obj.bpm }});
+    {% endfor %}
+
+
+    Chart.defaults.global.defaultFontFamily = '-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
+    Chart.defaults.global.defaultFontColor = '#292b2c';
+    // -- Area Chart Example
+    var ctx = document.getElementById("myAreaChart");
+    var myLineChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+
+            labels: time,
+            datasets: [{
+                label: "Pulse Rate",
+                lineTension: 0.3,
+                backgroundColor: "rgba(2,117,216,0.2)",
+                borderColor: "rgba(2,117,216,1)",
+                pointRadius: 5,
+                pointBackgroundColor: "rgba(2,117,216,1)",
+                pointBorderColor: "rgba(255,255,255,0.8)",
+                pointHoverRadius: 5,
+                pointHoverBackgroundColor: "rgba(2,117,216,1)",
+                pointHitRadius: 20,
+                pointBorderWidth: 2,
+                data: bpm,
+            }],
+        },
+        options: {
+            scales: {
+                xAxes: [{
+                    time: {
+                        unit: 'time'
+                    },
+                    gridLines: {
+                        display: false
+                    },
+                    ticks: {
+                        maxTicksLimit: 7
+                    }
+                }],
+                yAxes: [{
+                    ticks: {
+                        min: 0,
+                        max: 150,
+                        maxTicksLimit: 5
+                    },
+                    gridLines: {
+                        color: "rgba(0, 0, 0, .125)",
+                    }
+                }],
+            },
+            legend: {
+                display: false
+            }
+        }
+    });
+    // -- Bar Chart Example
+    var ctx = document.getElementById("myBarChart");
+    var myLineChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ["January", "February", "March", "April", "May", "June"],
+            datasets: [{
+                label: "Revenue",
+                backgroundColor: "rgba(2,117,216,1)",
+                borderColor: "rgba(2,117,216,1)",
+                data: [4215, 5312, 6251, 7841, 9821, 14984],
+            }],
+        },
+        options: {
+            scales: {
+                xAxes: [{
+                    time: {
+                        unit: 'month'
+                    },
+                    gridLines: {
+                        display: false
+                    },
+                    ticks: {
+                        maxTicksLimit: 6
+                    }
+                }],
+                yAxes: [{
+                    ticks: {
+                        min: 0,
+                        max: 15000,
+                        maxTicksLimit: 5
+                    },
+                    gridLines: {
+                        display: true
+                    }
+                }],
+            },
+            legend: {
+                display: false
+            }
+        }
+    });
+    // -- Pie Chart Example
+    var ctx = document.getElementById("myPieChart");
+    var myPieChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: ["Blue", "Red", "Yellow", "Green"],
+            datasets: [{
+                data: [12.21, 15.58, 11.25, 8.32],
+                backgroundColor: ['#007bff', '#dc3545', '#ffc107', '#28a745'],
+            }],
+        },
+    });
+
+</script>
+
+{#    Datadable js#}
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#dataTable1').DataTable();
+    });
+    $(document).ready(function () {
+        $('#dataTable2').DataTable();
+    });
+</script>
+
+
+
+
+</body>
+<script type="text/javascript">
+        $(function () {
+            setInterval('refresh()', 10000);
+        });
+    </script>
+</html>
