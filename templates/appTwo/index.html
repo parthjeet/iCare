@@ -103,11 +103,6 @@
                     <div class="card-body">
                         <div class="mr-5">Tremor detected?</div>
                         <div class="h2 mr-5">{{ accVal.0.isTremor }}</div>
-                        {% for i in accVal %}
-                            {% if i.isTremor == 'True' %}
-                                <div class="mr-5">Tremor detected at {{ i.updated }} </div>
-                            {% endif %}
-                        {% endfor %}
                     </div>
                 </div>
                 {% else %}
