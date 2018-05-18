@@ -26,6 +26,7 @@ class EspTest(models.Model):
 class AccModel(models.Model):
     isTremor = models.CharField(max_length=128, default="NULL")
     isFall = models.CharField(max_length=128, default="NULL")
+    isPressed = models.CharField(max_length=128, default="NULL")
     updated = models.DateTimeField(auto_now=True)
 
 

@@ -1,6 +1,57 @@
 {% load staticfiles %}
 <body class="sticky-footer bg-dark" id="page-top">
+<script type="text/javascript">
 
+        function initMap() {
+            var centerr = {lat: 12.902496, lng: 77.504822};
+            var current = {lat: {{ gpsVal.0.latValue }}, lng: {{ gpsVal.0.longValue }}};
+            var map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 19,
+                center: centerr
+            });
+            var marker = new google.maps.Marker({
+                position: centerr,
+                icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+                animation: google.maps.Animation.DROP,
+                map: map
+            });
+            var marker = new google.maps.Marker({
+                position: current,
+                map: map
+            });
+        }
+    </script>
+    {#Auto-Refresh Ajax js#}
+<audio id="alertMp3" src="{% static 'alert.mp3' %}" preload="auto"></audio>
+<script type="text/javascript">
+        function refresh() {
+            $.ajax({
+                url: '{% url 'index' %}',
+                success: function (data) {
+                    {% if new_acc == "True" and accVal.0.isPressed == 'True' %}
+                        document.getElementById('alertMp3').play();
+                        alert("Button pressed at {{ accVal.0.updated }} Latitude:{{ gpsVal.0.latValue }} Longitude: {{ gpsVal.0.longValue }} ");
+                    {% endif %}
+                    {% if new_acc == "True" and accVal.0.isTremor == 'True' %}
+                        document.getElementById('alertMp3').play();
+                        alert("Tremor detected at {{ accVal.0.updated }} Latitude:{{ gpsVal.0.latValue }} Longitude: {{ gpsVal.0.longValue }} ");
+                    {% endif %}
+                    {% if new_acc == "True" and accVal.0.isFall == 'True' %}
+                        document.getElementById('alertMp3').play();
+                        alert("Fall detected at {{ accVal.0.updated }} Latitude:{{ gpsVal.0.latValue }} Longitude: {{ gpsVal.0.longValue }} ");
+                    {% endif %}
+                    {% if new_gps == "True" and gpsVal.0.isSafe == 'False' and gpsVal.1.isSafe == "True" %}
+                        document.getElementById('alertMp3').play();
+                        alert("Person going out of Safe Zone at {{ accVal.0.updated }} Latitude:{{ gpsVal.0.latValue }} Longitude: {{ gpsVal.0.longValue }} ");
+                    {% endif %}
+                    $("#page-top").html(data);
+
+                    {#alert(data);#}
+                }
+            });
+
+        }
+    </script>
 <!-- Navigation-->
 <div class="">
     <div class="container-fluid">
@@ -14,12 +65,27 @@
         <!-- Icon Cards-->
         <div class="row">
             <div class="col-xl-3 col-sm-6 mb-3">
+                {%  if accVal.0.isTremor == 'False' %}
                 <div class="card text-white bg-primary o-hidden h-100">
                     <div class="card-body">
                         <div class="mr-5">Tremor detected?</div>
                         <div class="h2 mr-5">{{ accVal.0.isTremor }}</div>
+                        {% for i in accVal %}
+                            {% if i.isTremor == 'True' %}
+                                <div class="mr-5">Tremor detected at {{ i.updated }} </div>
+                            {% endif %}
+                        {% endfor %}
                     </div>
                 </div>
+                {% else %}
+                <div class="card text-white bg-danger o-hidden h-100">
+                    <div class="card-body">
+                        <div class="mr-5">Tremor detected?</div>
+                        <div class="h2 mr-5">{{ accVal.0.isTremor }} at {{ accVal.0.updated }}</div>
+                        <div class="mr-5">Latitude:{{ gpsVal.0.latValue }} Longitude: {{ gpsVal.0.longValue }}</div>
+                    </div>
+                </div>
+                {% endif %}
             </div>
             <div class="col-xl-3 col-sm-6 mb-3">
                 <div class="card text-white bg-warning o-hidden h-100">
@@ -170,25 +236,6 @@
     <a class="scroll-to-top rounded" href="#page-top">
         <i class="fa fa-angle-up"></i>
     </a>
-    <!-- Logout Modal-->
-    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-         aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
-                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
-                    </button>
-                </div>
-                <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-                    <a class="btn btn-primary" href="login.html">Logout</a>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
 <!-- Bootstrap core JavaScript-->
 <script src="{% static "vendor/jquery/jquery.min.js" %}"></script>

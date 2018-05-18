@@ -6,14 +6,34 @@ from django.contrib.admin.models import LogEntry, ADDITION
 from appTwo.forms import NewUserForm
 from appTwo.models import EspTest, AccModel, GpsModel
 
-
 # Create your views here.
+acc_count = AccModel.objects.count()
+gps_count = GpsModel.objects.count()
+
 
 def index(request):
+    new_acc = 'False'
+    new_gps = 'False'
     acc_list = AccModel.objects.order_by('-updated')
     gps_list = GpsModel.objects.order_by('-updated')
-    obj_dict = {'accVal': acc_list, 'gpsVal': gps_list}
+
+    global acc_count
+    global gps_count
+    if acc_count != AccModel.objects.count():
+        # global new_acc
+        new_acc = 'True'
+        acc_count = AccModel.objects.count()
+
+    if gps_count != GpsModel.objects.count():
+        # global new_gps
+        new_gps = 'True'
+        gps_count = GpsModel.objects.count()
+
+    obj_dict = {'accVal': acc_list, 'gpsVal': gps_list, 'new_acc': new_acc, 'new_gps': new_gps, 'range10': range(10)}
+    # if new_acc == 'True':
+    #     input("updated")
     if request.is_ajax():
+        # print(acc_count)
         return render(request, 'appTwo/indexBody.html', context=obj_dict)
     return render(request, 'appTwo/index.html', context=obj_dict)
 
@@ -77,6 +97,7 @@ def acc(request):
         b = AccModel(
             isTremor=mydict['isTremor'][0],
             isFall=mydict['isFall'][0],
+            isPressed=mydict['isPressed'][0],
         )
         b.save()
         return render(request, 'appTwo/index.html')
@@ -88,6 +109,10 @@ def gps(request):
         b = GpsModel()
         print(request.POST)
         mydict = dict(request.POST.lists())
+        if mydict['isSafe'][0] == 'T':
+            mydict['isSafe'][0] = 'True'
+        elif mydict['isSafe'][0] == 'F':
+            mydict['isSafe'][0] = 'False'
         print(mydict)
         b = GpsModel(
             latValue=mydict['latValue'][0],
